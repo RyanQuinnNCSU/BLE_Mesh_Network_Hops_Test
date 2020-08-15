@@ -88,6 +88,9 @@ static uint8_t init_done = 0;
 // My Globals:
 uint8_t Transaction_id = 0;
 
+// My Definitions:
+#define BUTTON_PRESSED 8
+
 /*******************************************************************************
  * Function prototypes.
  ******************************************************************************/
@@ -201,7 +204,7 @@ static void set_device_name(bd_addr *pAddr)
   uint16_t result;
 
   // Create unique device name using the last two bytes of the Bluetooth address
-  snprintf(name, 20, "sensor client %02x:%02x",
+  snprintf(name, 20, "Test Node %02x:%02x",
            pAddr->addr[1], pAddr->addr[0]);
 
   log("Device name: '%s'\r\n", name);
@@ -277,7 +280,7 @@ static void handle_node_initialized_event(
     printf("mesh_generic_client_init %x\r\n", result);
     result = gecko_cmd_mesh_generic_server_init()->result;
     printf("mesh_generic_server_init %x\r\n", result);
-	gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMDER_ID_SEND_GENERIC_CLIENT_MESSAGE,0);
+	//gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMDER_ID_SEND_GENERIC_CLIENT_MESSAGE,0);
     DI_Print("provisioned", DI_ROW_STATUS);
   } else {
     /*log("node is unprovisioned\r\n");
@@ -456,6 +459,8 @@ void handle_timer_event(uint8_t handle)
     	    						Transaction_id = 0;
     	    					}
           break;
+    case TIMER_ID_CLEAR_DI_BUTTON_MESSAGE:
+    	DI_Print("                    ",8);
     default:
       break;
   }
@@ -470,14 +475,13 @@ void handle_external_signal_event(uint8_t signal)
 {
   if (signal & EXT_SIGNAL_PB0_PRESS) {
     log("PB0 pressed\r\n");
-    sensor_client_change_property();
+    DI_Print("      Button 0      ",BUTTON_PRESSED);
+    gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_BUTTON_MESSAGE,1);
   }
   if ((signal & EXT_SIGNAL_PB1_PRESS) || (signal & EXT_SIGNAL_PB0_MEDIUM_PRESS)) {
     log("PB1 pressed\r\n");
-    sensor_client_publish_get_descriptor_request();
-    gecko_cmd_hardware_set_soft_timer(TIMER_MS_2_TICKS(2000),
-                                      TIMER_ID_SENSOR_DATA,
-                                      0);
+    DI_Print("      Button 1      ",BUTTON_PRESSED);
+    gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_BUTTON_MESSAGE,1);
   }
 }
 
