@@ -19,7 +19,7 @@ void Self_Provision_Device(void)
 	//Set Keys
 	
 	uint16 result=0;
-		
+	printf("Unicast = %x \n\r", Unicast);
 	result = gecko_cmd_mesh_node_set_provisioning_data(DevKey, NetKey, 0, 0, Unicast, 0)->result;
 	printf("gecko_cmd_mesh_node_set_provisioning_data %x\n\r", result);
 	

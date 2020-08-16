@@ -87,6 +87,18 @@ static uint8_t init_done = 0;
 
 // My Globals:
 uint8_t Transaction_id = 0;
+//HB Pub Parameters
+uint16 publication_address = 0x4440; //destination address (unicast)
+uint8 pub_count_log = 5; //2^(5-1) = 16 messages  //number of HB messages to publish
+uint8 pub_period_log = 2; //2^(2-1) send message every 2 seconds //time between HB messages
+uint8 HB_TTL = 5;
+uint16 features = 0;
+uint16 netkey_index = 0;
+//HB Sub Parameters
+uint16 subscription_source = 0x30c1; //source unicast address
+uint16 subscription_destination = 0x4440;
+uint8 sub_period_log = 5; //2^(5-1) = 16 seconds // length of time sub will listen for HB messages.
+
 
 // My Definitions:
 #define BUTTON_PRESSED 8
@@ -475,13 +487,17 @@ void handle_external_signal_event(uint8_t signal)
 {
   if (signal & EXT_SIGNAL_PB0_PRESS) {
     log("PB0 pressed\r\n");
-    DI_Print("      Button 0      ",BUTTON_PRESSED);
+    DI_Print("      Publish HB    ",BUTTON_PRESSED);
     gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_BUTTON_MESSAGE,1);
+    uint16 pub_res = gecko_cmd_mesh_test_set_local_heartbeat_publication(publication_address, pub_count_log, pub_period_log, HB_TTL, features, netkey_index)->result;
+    printf("gecko_cmd_mesh_test_set_local_heartbeat_publication = %x \n\r",pub_res);
   }
   if ((signal & EXT_SIGNAL_PB1_PRESS) || (signal & EXT_SIGNAL_PB0_MEDIUM_PRESS)) {
     log("PB1 pressed\r\n");
-    DI_Print("      Button 1      ",BUTTON_PRESSED);
+    DI_Print("      Receive HB    ",BUTTON_PRESSED);
     gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_BUTTON_MESSAGE,1);
+    uint16 sub_res = gecko_cmd_mesh_test_set_local_heartbeat_subscription(subscription_source, subscription_destination, sub_period_log)->result;
+    printf("gecko_cmd_mesh_test_set_local_heartbeat_subscription = %x \n\r",sub_res);
   }
 }
 
@@ -579,6 +595,18 @@ static void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *pEvt)
     		printf("%x", server_resp->parameters.data[di]);
     	}
     	printf("\r\n\n");
+    	break;
+    case gecko_evt_mesh_test_local_heartbeat_subscription_complete_id:
+    	printf("gecko_evt_mesh_test_local_heartbeat_subscription_complete_id \r\n");
+    	struct  gecko_msg_mesh_test_local_heartbeat_subscription_complete_evt_t *heartbeat_results =(struct gecko_msg_mesh_test_local_heartbeat_subscription_complete_evt_t *) &(pEvt->data);
+    	uint16 HB_received = heartbeat_results->count;
+    	uint8 max_hops = heartbeat_results->hop_max;
+    	uint8 min_hops = heartbeat_results->hop_min;
+    	printf("Subscription period has ended. \r\n");
+    	printf("Total heartbeat messages received = %d \r\n", HB_received);
+    	printf("Max number of hops taken heartbeat message to arrive = %d \r\n", max_hops);
+    	printf("Min number of hops taken heartbeat message to arrive = %d \r\n", min_hops);
+
     	break;
     default:
       //log("unhandled evt: %8.8x class %2.2x method %2.2x\r\n", evt_id, (evt_id >> 16) & 0xFF, (evt_id >> 24) & 0xFF);
