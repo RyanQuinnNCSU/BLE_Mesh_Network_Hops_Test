@@ -89,19 +89,19 @@ static uint8_t init_done = 0;
 uint8_t Transaction_id = 0;
 //HB Pub Parameters
 uint16 publication_address = 0x4440; //destination address (unicast)
-uint8 pub_count_log = 5; //2^(5-1) = 16 messages  //number of HB messages to publish
-uint8 pub_period_log = 2; //2^(2-1) send message every 2 seconds //time between HB messages
+uint8 pub_count = 5; //2^(5-1) = 16 messages  //number of HB messages to publish
+uint8 pub_period = 2; //2^(2-1) send message every 2 seconds //time between HB messages
 uint8 HB_TTL = 5;
 uint16 features = 0;
 uint16 netkey_index = 0;
 //HB Sub Parameters
 uint16 subscription_source = 0x30c1; //source unicast address
 uint16 subscription_destination = 0x4440;
-uint8 sub_period_log = 5; //2^(5-1) = 16 seconds // length of time sub will listen for HB messages.
+uint8 sub_period = 5; //2^(5-1) = 16 seconds // length of time sub will listen for HB messages.
 
 
 // My Definitions:
-#define BUTTON_PRESSED 8
+#define DEBUG_MESSAGE_ROW 8
 
 /*******************************************************************************
  * Function prototypes.
@@ -471,7 +471,7 @@ void handle_timer_event(uint8_t handle)
     	    						Transaction_id = 0;
     	    					}
           break;
-    case TIMER_ID_CLEAR_DI_BUTTON_MESSAGE:
+    case TIMER_ID_CLEAR_DI_MESSAGE:
     	DI_Print("                    ",8);
     default:
       break;
@@ -487,16 +487,16 @@ void handle_external_signal_event(uint8_t signal)
 {
   if (signal & EXT_SIGNAL_PB0_PRESS) {
     log("PB0 pressed\r\n");
-    DI_Print("      Publish HB    ",BUTTON_PRESSED);
-    gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_BUTTON_MESSAGE,1);
-    uint16 pub_res = gecko_cmd_mesh_test_set_local_heartbeat_publication(publication_address, pub_count_log, pub_period_log, HB_TTL, features, netkey_index)->result;
+    DI_Print("      Publish HB    ",DEBUG_MESSAGE_ROW);
+    gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_MESSAGE,1);
+    uint16 pub_res = gecko_cmd_mesh_test_set_local_heartbeat_publication(publication_address, pub_count, pub_period, HB_TTL, features, netkey_index)->result;
     printf("gecko_cmd_mesh_test_set_local_heartbeat_publication = %x \n\r",pub_res);
   }
   if ((signal & EXT_SIGNAL_PB1_PRESS) || (signal & EXT_SIGNAL_PB0_MEDIUM_PRESS)) {
     log("PB1 pressed\r\n");
-    DI_Print("      Receive HB    ",BUTTON_PRESSED);
-    gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_BUTTON_MESSAGE,1);
-    uint16 sub_res = gecko_cmd_mesh_test_set_local_heartbeat_subscription(subscription_source, subscription_destination, sub_period_log)->result;
+    DI_Print("      Receive HB    ",DEBUG_MESSAGE_ROW);
+    gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_MESSAGE,1);
+    uint16 sub_res = gecko_cmd_mesh_test_set_local_heartbeat_subscription(subscription_source, subscription_destination, sub_period)->result;
     printf("gecko_cmd_mesh_test_set_local_heartbeat_subscription = %x \n\r",sub_res);
   }
 }
@@ -556,10 +556,110 @@ static void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *pEvt)
       break;
 
     case gecko_evt_gatt_server_user_write_request_id:
-      if (gattdb_ota_control
-          == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
-        enter_to_dfu_ota(pEvt->data.evt_gatt_server_user_write_request.connection);
-      }
+    	printf("GATT write request recieved \r\n");
+    	int write_len = 0;
+		  if (gattdb_ota_control
+			  == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+			enter_to_dfu_ota(pEvt->data.evt_gatt_server_user_write_request.connection);
+		  }
+		  //Publish Address
+		  if (gattdb_Pub_Addr == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+			  write_len = (int)pEvt->data.evt_gatt_server_user_write_request.value.len;
+			  if(write_len != 2){
+				  DI_Print("   GATT WRT Fail    ",DEBUG_MESSAGE_ROW);
+				  gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_MESSAGE,1);
+
+			  }
+			  else{
+				  publication_address = (pEvt->data.evt_gatt_server_user_write_request.value.data[1]) | (pEvt->data.evt_gatt_server_user_write_request.value.data[0] << 8);
+				  printf("publication_address written as %x \n\r", publication_address);
+			  }
+
+		  }
+		  //Publish Count
+		  if (gattdb_Pub_Count == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+			  write_len = (int)pEvt->data.evt_gatt_server_user_write_request.value.len;
+			  if(write_len != 1){
+				  DI_Print("   GATT WRT Fail    ",DEBUG_MESSAGE_ROW);
+				  gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_MESSAGE,1);
+
+			  }
+			  else{
+				  pub_count = pEvt->data.evt_gatt_server_user_write_request.value.data[0];
+				  printf("pub_count written as %x \n\r", pub_count);
+			  }
+
+		  }
+		  //Publish Period
+		  if (gattdb_Pub_Period == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+			  write_len = (int)pEvt->data.evt_gatt_server_user_write_request.value.len;
+			  if(write_len != 1){
+				  DI_Print("   GATT WRT Fail    ",DEBUG_MESSAGE_ROW);
+				  gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_MESSAGE,1);
+
+			  }
+			  else{
+				  pub_period = pEvt->data.evt_gatt_server_user_write_request.value.data[0];
+				  printf("pub_period written as %x \n\r", pub_period);
+			  }
+
+		  }
+		  //HB TTL
+			  if (gattdb_HB_TTL == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+				  write_len = (int)pEvt->data.evt_gatt_server_user_write_request.value.len;
+				  if(write_len != 1){
+					  DI_Print("   GATT WRT Fail    ",DEBUG_MESSAGE_ROW);
+					  gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_MESSAGE,1);
+
+				  }
+				  else{
+					HB_TTL = pEvt->data.evt_gatt_server_user_write_request.value.data[0];
+					printf("HB_TTL written as %x \n\r", HB_TTL);
+				  }
+
+			  }
+			//Subscription Source Address
+			  if (gattdb_Sub_Source_Addr  == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+				  write_len = (int)pEvt->data.evt_gatt_server_user_write_request.value.len;
+				  if(write_len != 2){
+					  DI_Print("   GATT WRT Fail    ",DEBUG_MESSAGE_ROW);
+					  gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_MESSAGE,1);
+
+				  }
+				  else{
+					  subscription_source = (pEvt->data.evt_gatt_server_user_write_request.value.data[1]) | (pEvt->data.evt_gatt_server_user_write_request.value.data[0] << 8);
+					  printf("subscription_source written as %x \n\r", subscription_source);
+				  }
+
+			  }
+			  //Subscription Source Address
+			  if (gattdb_Sub_Destination_Addr   == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+				  write_len = (int)pEvt->data.evt_gatt_server_user_write_request.value.len;
+				  if(write_len != 2){
+					  DI_Print("   GATT WRT Fail    ",DEBUG_MESSAGE_ROW);
+					  gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_MESSAGE,1);
+
+				  }
+				  else{
+					  subscription_destination = (pEvt->data.evt_gatt_server_user_write_request.value.data[1]) | (pEvt->data.evt_gatt_server_user_write_request.value.data[0] << 8);
+					  printf("subscription_destination written as %x \n\r", subscription_destination);
+				  }
+
+			  }
+			  //Subscription Period
+			  if (gattdb_Sub_Destination_Addr   == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+				  write_len = (int)pEvt->data.evt_gatt_server_user_write_request.value.len;
+				  if(write_len != 1){
+					  DI_Print("   GATT WRT Fail    ",DEBUG_MESSAGE_ROW);
+					  gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMER_ID_CLEAR_DI_MESSAGE,1);
+
+				  }
+				  else{
+					  sub_period = pEvt->data.evt_gatt_server_user_write_request.value.data[0];
+					  printf("sub_period written as %x \n\r", sub_period);
+				  }
+
+			  }
       break;
 
     case gecko_evt_hardware_soft_timer_id:

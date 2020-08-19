@@ -18,6 +18,13 @@ extern const struct bg_gattdb_def bg_gattdb_data;
 #define gattdb_client_support_features          8
 #define gattdb_device_name                     11
 #define gattdb_ota_control                     31
+#define gattdb_Pub_Addr                        34
+#define gattdb_Pub_Count                       37
+#define gattdb_Pub_Period                      40
+#define gattdb_HB_TTL                          43
+#define gattdb_Sub_Source_Addr                 47
+#define gattdb_Sub_Destination_Addr            50
+#define gattdb_Sub_Period                      53
 
 typedef enum
 {
