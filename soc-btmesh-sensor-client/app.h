@@ -19,8 +19,10 @@
 #define APP_H
 
 #include <gecko_configuration.h>
+#include <mesh_app_memory_config.h>
 
 extern uint16_t Unicast;
+extern uint8_t unicast_array[4];
 
 //Model IDs
 #define GENERIC_LEVEL_SERVER 0x1002
@@ -42,6 +44,17 @@ extern uint16_t Unicast;
 #define DATA_LENGHT_SERVER 4
 #define DELAY 0
 #define SERVER_FLAGS 0xFFFFFFFF
+
+//Advertising Handles
+#define MY_ADVERTISERS 2
+#define MAX_ADVERTISERS (4 + MESH_CFG_MAX_NETKEYS + MY_ADVERTISERS)
+#define MY_FIRST_HANDLE (4 + MESH_CFG_MAX_NETKEYS + 1)
+
+
+
+
+
+
 
 
 /***************************************************************************//**

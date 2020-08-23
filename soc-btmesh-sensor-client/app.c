@@ -265,6 +265,12 @@ static void handle_boot_event(void)
   }
 }
 
+
+
+
+
+
+
 /***************************************************************************//**
  * Handling of mesh node initialized event.
  * If device is provisioned it initializes the sensor server node.
@@ -294,6 +300,7 @@ static void handle_node_initialized_event(
     printf("mesh_generic_server_init %x\r\n", result);
 	//gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMDER_ID_SEND_GENERIC_CLIENT_MESSAGE,0);
     DI_Print("provisioned", DI_ROW_STATUS);
+
   } else {
     /*log("node is unprovisioned\r\n");
     DI_Print("unprovisioned", DI_ROW_STATUS);
@@ -556,7 +563,7 @@ static void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *pEvt)
       break;
 
     case gecko_evt_gatt_server_user_write_request_id:
-    	printf("GATT write request recieved \r\n");
+    	printf("GATT write request received \r\n");
     	int write_len = 0;
 		  if (gattdb_ota_control
 			  == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
@@ -661,6 +668,52 @@ static void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *pEvt)
 
 			  }
       break;
+
+    case gecko_evt_gatt_server_user_read_request_id:
+    	printf("GATT read request received \r\n");
+    	    	//int read_len = 0;
+    			  //Publish Address
+    			  if (gattdb_Pub_Addr == pEvt->data.evt_gatt_server_user_read_request.characteristic) {
+    				  gecko_cmd_gatt_server_send_user_read_response( pEvt->data.evt_gatt_server_user_read_request.connection, gattdb_Pub_Addr, 0, 2, &publication_address);
+    				  }
+
+
+
+    			  //Publish Count
+    			  if (gattdb_Pub_Count == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+
+    				  gecko_cmd_gatt_server_send_user_read_response( pEvt->data.evt_gatt_server_user_read_request.connection, gattdb_Pub_Count, 0, 1, &pub_count);
+
+    			  }
+    			  //Publish Period
+    			  if (gattdb_Pub_Period == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+
+    				  gecko_cmd_gatt_server_send_user_read_response( pEvt->data.evt_gatt_server_user_read_request.connection, gattdb_Pub_Period, 0, 1, &pub_period);
+
+    			  }
+    			  //HB TTL
+    				  if (gattdb_HB_TTL == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+    					  gecko_cmd_gatt_server_send_user_read_response( pEvt->data.evt_gatt_server_user_read_request.connection, gattdb_HB_TTL, 0, 1, &HB_TTL);
+
+    				  }
+    				//Subscription Source Address
+    				  if (gattdb_Sub_Source_Addr  == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+    					  gecko_cmd_gatt_server_send_user_read_response( pEvt->data.evt_gatt_server_user_read_request.connection, gattdb_Sub_Source_Addr, 0, 2, &subscription_source);
+
+
+    				  }
+    				  //Subscription Source Address
+    				  if (gattdb_Sub_Destination_Addr   == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+    					  gecko_cmd_gatt_server_send_user_read_response( pEvt->data.evt_gatt_server_user_read_request.connection, gattdb_Sub_Destination_Addr, 0, 2, &subscription_destination);
+
+
+    				  }
+    				  //Subscription Period
+    				  if (gattdb_Sub_Period   == pEvt->data.evt_gatt_server_user_write_request.characteristic) {
+    					  gecko_cmd_gatt_server_send_user_read_response( pEvt->data.evt_gatt_server_user_read_request.connection, gattdb_Pub_Count, 0, 1, &sub_period);
+
+    				  }
+    	      break;
 
     case gecko_evt_hardware_soft_timer_id:
       handle_timer_event(pEvt->data.evt_hardware_soft_timer.handle);

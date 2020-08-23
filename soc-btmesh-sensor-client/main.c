@@ -33,6 +33,9 @@
 //for unicast
 #include "em_system.h"
 
+//Printf
+#include <stdio.h>
+
 /***************************************************************************//**
  * @addtogroup Application
  * @{
@@ -45,7 +48,7 @@
 
 //Globals
 uint16_t Unicast;
-
+uint8_t unicast_array[4] =  {0,0,0,0};
 
 
 /// Maximum number of simultaneous Bluetooth connections
@@ -64,7 +67,6 @@ uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS) + BTMESH_HE
 /// * N advertisement sets for Mesh GATT service advertisements
 /// (one for each network key, handle numbers 4 .. N+3)
 ///
-#define MAX_ADVERTISERS (4 + MESH_CFG_MAX_NETKEYS)
 
 /// Priorities for bluetooth link layer operations
 static gecko_bluetooth_ll_priorities linklayer_priorities = GECKO_BLUETOOTH_PRIORITIES_DEFAULT;
