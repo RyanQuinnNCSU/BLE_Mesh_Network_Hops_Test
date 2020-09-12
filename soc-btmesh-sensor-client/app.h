@@ -22,7 +22,7 @@
 #include <mesh_app_memory_config.h>
 
 extern uint16_t Unicast;
-extern uint8_t unicast_array[4];
+extern char unicast_array[4];
 
 //Model IDs
 #define GENERIC_LEVEL_SERVER 0x1002

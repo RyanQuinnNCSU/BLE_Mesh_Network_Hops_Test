@@ -103,6 +103,8 @@ uint16 min_interval =  0x0c80; //4s interval
 uint16 max_interval =  0x0c80; //4s interval
 uint16 latancy =  0x01f4; //max latancy allowed
 uint16 timeout =  0x0c80; //32 seconds.
+//Name Beacon
+uint8_t adv_name[]= {0x02,0x01,0x06,0x0F,0x09,'T','E','S','T','\040','N','O','D','E','\040','0','0','0','0'};
 
 // My Definitions:
 #define DEBUG_MESSAGE_ROW 8
@@ -207,6 +209,31 @@ static void initiate_factory_reset(void)
                                     1);
 }
 
+//Set Up Name Beacon
+void My_Name_Beacon(){
+uint16_t error_check;
+uint8_t adv_size = sizeof(adv_name);
+//Add unicast to end of name beacon
+adv_name[adv_size - 4] = unicast_array[0];
+adv_name[adv_size - 3] = unicast_array[1];
+adv_name[adv_size - 2] = unicast_array[2];
+adv_name[adv_size - 1] = unicast_array[3];
+
+
+//set name beacon data
+error_check = gecko_cmd_le_gap_bt5_set_adv_data(MY_FIRST_HANDLE, 0,adv_size, (const char *)adv_name)->result;
+if(error_check){
+	printf("gecko_cmd_le_gap_bt5_set_adv_data = %x\r\n", error_check);
+}
+
+//start beacon
+error_check = gecko_cmd_le_gap_start_advertising(MY_FIRST_HANDLE, le_gap_user_data,le_gap_non_connectable)->result;
+if(error_check){
+	printf("gecko_cmd_le_gap_start_advertising = %x\r\n", error_check);
+}
+
+
+}
 /***************************************************************************//**
  * Set device name in the GATT database. A unique name is generated using
  * the two last bytes from the Bluetooth address of this device. Name is also
@@ -305,7 +332,7 @@ static void handle_node_initialized_event(
 	//gecko_cmd_hardware_set_soft_timer(10*ONE_SECOND,TIMDER_ID_SEND_GENERIC_CLIENT_MESSAGE,0);
     DI_Print("provisioned", DI_ROW_STATUS);
     gecko_cmd_le_gap_set_conn_timing_parameters(min_interval, max_interval, latancy, timeout, 0, 0xffff);
-
+    My_Name_Beacon(); //start name beacon
   } else {
     /*log("node is unprovisioned\r\n");
     DI_Print("unprovisioned", DI_ROW_STATUS);

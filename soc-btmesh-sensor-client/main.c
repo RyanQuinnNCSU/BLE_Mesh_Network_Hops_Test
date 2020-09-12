@@ -48,7 +48,7 @@
 
 //Globals
 uint16_t Unicast;
-uint8_t unicast_array[4] =  {0,0,0,0};
+char unicast_array[4];
 
 
 /// Maximum number of simultaneous Bluetooth connections
@@ -111,7 +111,7 @@ int main(void)
   initVcomEnable();
 
   Unicast = (uint16_t)(SYSTEM_GetUnique() & 0x7FFF);
-
+  sprintf(unicast_array,"%x",Unicast);
   // Minimize advertisement latency by allowing the advertiser to always
   // interrupt the scanner.
   linklayer_priorities.scan_max = linklayer_priorities.adv_min + 1;
