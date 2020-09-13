@@ -38,7 +38,7 @@ This project was built off on the linked repo and was devloped using Silabs' Sim
 
 The hardware used for this project was Silabs Dev Kits that use the efr32mg12p432f1024gl125 chip.
 
-![dev_kit](/Photos/Dev_Kit_Photos/dev_kit.jpg)
+<img src="/Photos/Dev_Kit_Photos/dev_kit.jpg" height="500">
 
 ## Heartbeat Test Requirments
 The following code changes need to be impliented inorder to run a BLE Mesh network heartbeat test.
@@ -175,14 +175,15 @@ Lets run though and example Heartbeat test with a small BLE Mesh self-provisione
 
 1. Flash the firmware binary onto each device. Once the firmware has been flash to your devices, check to the serial log to make sure no errors have occured. Below is an example of a self-provisioned bootup with no errors.
 
-![Bootup_EX_Log](/Photos/Putty_Logs/Unicast_550f_Bootup.png)
-  
+
+<img src="/Photos/Putty_Logs/Unicast_550f_Bootup.PNG" height="500">
+
 2. Set the Publisher:
 With the network up and running, choose a node to publish the heartbeat messages and define the parameter values. This will require using the GATT service discribed in a previous section of the readme.
 
 In this example there are 3 devices to choose from. Below is a scan taken from the "EFR Connect" mobile app showing all 3 devices and there unicast address in hex (note this scan shows a custom name beacon set up in the repo).
 
-![Device_List](/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-141708.png)
+<img src="/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-141708.png" height="500">
 
 Lets choose the device with unicast 550f as the publisher and device 4440 as the subscriber.
 
@@ -190,49 +191,49 @@ To set the publisher settings press the "connect" button next to 550f.
 
 After a brief loading screen you should see contents similare to the screenshot below listing the various GATT services of the 550f node.
 
-![GATT_Services](/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142532.png)
+<img src="/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142532.png" height="500">
 
 Lets scroll until we find the heartbeat publish GATT service (UUID bf93eaea-db28-4e72-8f0f-0aa8997a6720) *second from the bootom
 
-![Pub_Service](/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142546.png)
+<img src="/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142546.png" height="500">
 
 Tap on the publish service to reveal the different publisher parameter characterstics. 
 
-![Pub_Chars](/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142555.png)
+<img src="/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142555.png" height="500">
 
 The mobile app doesn't display names for these charactersitics only the UUID. Please reference the earlier sections of this document to match publish paramters with the char UUID.
 
 The only publish parameter that can't use the default value is pub_addr. Its char UUID is 81547b88-7cc6-4a57-a386-1bf21a70ae20. Press on that char to write the destination address 0x4440.
 
-![Write_Char](/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142617.png)
+<img src="/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142617.png" height="500">
 
 After pressing send we should see on the serial log that the value of pub_address on 550f has been updated.
  
-![550f_write_pubaddr](/Photos/Putty_Logs/550f_write_pubaddr.png)
+<img src="/Photos/Putty_Logs/550f_write_pubaddr.PNG" height="500">
 
 While we can alter the other publish parameters for this example they will be kept to there default values. lets disconnect the GATT connect from the 550f node and the mobile app. Press the back button to return to the services window and press "disconnect".
 
-![Disconnect_GATT](/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142742.png)
+<img src="/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142742.png" height="500">
 
 3. Set the Subscriber:
 
 In this example, the device with unicast 4440 will be the subscribing node. To set the subscribing settings press the "connect" button next to 4440.
 
-![Device_List](/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-141708.png)
+<img src="/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-141708.png" height="500">
 
 Once the GATT connection has been established, scoll to the subscription service (UUID f38aa561-2acb-44d8-8e07-247d139d1be3)
 
-![Sub_Service](/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142836.png)
+<img src="/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142836.png" height="500">
 
 Now set the parameter values of subscription_source (UUID 95c25690-cc30-4de3-80b1-6029acfc75a7) and subscription_destination (UUID 1e9ea2d6-f740-4761-b8ba-b5ae97e17d24)
 
-![Write_Char](/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142853.png)
+<img src="/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142853.png" height="500">
 
-![Write_Char](/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142926.png)
+<img src="/Photos/Blue_Gecko_Screenshots/Screenshot_20200912-142926.png" height="500">
 
 After pressing send we should see on the serial log that the value of pub_address on 550f has been updated.
  
-![4440_sub_write](/Photos/Putty_Logs/4440_sub_write.png)
+<img src="/Photos/Putty_Logs/4440_sub_write.PNG" height="500">
 
 The sub_period can also be changed, but for this test we will use the default value. 
 
@@ -248,18 +249,17 @@ Then button 0 is pressed on device 550f and it starts to publish the default num
 
 The LCD on the dev kits shows debug messages saying that 550f is publish heartbeats and 4440 is receiving hearbeats.
 
-![HB_prints](/Photos/Dev_Kit_Photos/HB_prints.jpg)
-
+<img src="/Photos/Dev_Kit_Photos/HB_prints.jpg" height="500">
 
 Once the sub_period has run out (by default 16 seconds) the gecko_evt_mesh_test_local_heartbeat_subscription_complete_id event is tirggerd in node 4440. From this event it will print the min/max hops and the number of messages recieved. 
 
-![4440_test1](/Photos/Putty_Logs/4440_test1.png)
+<img src="/Photos/Putty_Logs/4440_test1.PNG" height="500">
 
 Notice that in this test the min and max number of hops was the same at just one hop. This means that 3rd device (unicast 562a) in the network was never used to forward packets from 550f to 4440. This is becasue I had the publishing and subscribing device write next to eachother.
 
 In another test I conected, I spread out all 3 network devices and changed some additiona parameters via the GATT chars. As you can see below, now the max number of hops is set to 2 (meaning 550f -> 562a -> 4440).
 
-![4440_test2](/Photos/Putty_Logs/4440_test2.png)
+<img src="/Photos/Putty_Logs/4440_test2.PNG" height="500">
 
 # Wrap Up
 Hope this helps, best of luck in your network testing!
